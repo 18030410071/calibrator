@@ -38,6 +38,14 @@ def un_distort_point(point,_camera_matrix, _camera_tuned_matrix, _camera_distort
     y = temp[0][0][1] * fy + cy
     return ge.Point(x, y)
 
+def pixel2cam(point,_camera_matrix):
+    fx, fy = _camera_matrix[0][0], _camera_matrix[1][1]
+    cx, cy = _camera_matrix[0][2], _camera_matrix[1][2]
+    x = (point.x - cx) / fx
+    y = (point.y - cy) / fy
+    return ge.Point(x,y)
+
+
 def getProjMtx(rvec,tvec):
     rmtx, _ = cv2.Rodrigues(rvec)
     return np.hstack((rmtx,tvec))
@@ -161,4 +169,29 @@ print('x1\n',x1)
 print('x2\n',x2)
 
 
+pl = ge.Point(498.0, 186.)
+pr = ge.Point(130., 179.)
+pl = pixel2cam(pl, matrixl)
+pr = pixel2cam(pr, matrixr)
 
+_2dl = np.array([[pl.x, 404., 447.],
+                [pl.y, 181. ,180.],
+                [1., 1. ,1.]])
+_2dr = np.array([[pr.x, 70., 96],
+                [pr.y, 168.,170.],
+                [1., 1., 1.]])
+
+
+X = cv2.triangulatePoints( projl, projr, _2dl[:2], _2dr[:2] )  # coor 
+# Remember to divide out the 4th row. Make it homogeneous
+X /= X[3]
+# Recover the origin arrays from PX
+x1 = np.dot(projl,X)
+x2 = np.dot(projr,X)
+# Again, put in homogeneous form before using them
+x1 /= x1[2]
+x2 /= x2[2]
+ 
+print('X\n',X)
+print('x1\n',x1)
+print('x2\n',x2)
