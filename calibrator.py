@@ -6,12 +6,14 @@ import glob
 import shelve
 from loader import *
 
+'''
 _camera_matrix = load_camera_matrix()
 _camera_distortion = load_camera_distortion()
 _camera_tuned_matrix = load_camera_matrix_tuned()
 
 _remap_x, _remap_y = cv2.initUndistortRectifyMap(_camera_matrix, _camera_distortion, None, _camera_tuned_matrix,
                                               (CAMERA_WIDTH, CAMERA_HEIGHT), cv2.CV_32FC1)
+'''
 
 def un_distort_image(image):
     """
@@ -105,7 +107,7 @@ def _calibrate_camera():
     obj_points = []  # 3d point in real world space
     img_points = []  # 2d points in image plane
 
-    image_list = glob.glob(os.path.join('C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board', "*.bmp"))
+    image_list = glob.glob(os.path.join('C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\left', "*.bmp"))
     #print(image_list)
     gray = None
     for img_name in image_list:
@@ -134,6 +136,7 @@ def _calibrate_camera():
     print(type(obj_points[0]),obj_points[0].shape,obj_points[0])    
         #cv2.calibrateCamera([obj_points[-1]], [img_points[-1]], gray.shape[::-1], None, None)
     #print("RT Matrix",np.array(rotation).shape,np.array(translation).shape,rotation)
+    
     print("projMtx:\n",getProjMtx(np.array(rotation[0]),np.array(translation[0])))
     projMtx = getProjMtx(np.array(rotation[0]),np.array(translation[0]))
     _3d = np.array([8,0,0,1])
@@ -145,6 +148,7 @@ def _calibrate_camera():
         new_img_points, _ = cv2.projectPoints(obj_points[i], rotation[i], translation[i], matrix, distortion)#3D点投影到平面
         error = cv2.norm(img_points[i], new_img_points, cv2.NORM_L2) / len(new_img_points)
         mean_error += error
+        print("new and old:",new_img_points[1],img_points[i][1])
     print("mean error: ", mean_error / len(obj_points))
 
     return np.array(matrix), np.array(distortion)
@@ -154,7 +158,7 @@ def _check_calibration():
     """
     check if the calibration is correct
     """
-    image_list = glob.glob(os.path.join("C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board", "*.bmp"))
+    image_list = glob.glob(os.path.join("C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\left", "*.bmp"))
     for single_img in image_list:
         image = cv2.imread(single_img)
         new_image = un_distort_image(image)
@@ -198,8 +202,11 @@ def _check_calibration():
 
 if __name__ == "__main__":
     
+    
     pos = generate_chessboard()
     _camera_matrix, _camera_distortion = _calibrate_camera()
+
+    save_camera_matrix(_camera_matrix)
     print("camera_matrix:\n",_camera_matrix)
     print("distortion:\n",_camera_distortion)
     _camera_tuned_matrix, _ = cv2.getOptimalNewCameraMatrix(_camera_matrix, _camera_distortion, (CAMERA_WIDTH, CAMERA_HEIGHT), 1, (CAMERA_WIDTH, CAMERA_HEIGHT))

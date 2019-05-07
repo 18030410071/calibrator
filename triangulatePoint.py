@@ -42,22 +42,13 @@ cameraMatrix = np.array([[653.53, 0.0, 405.88],[0.0, 623.26, 267.43],[0.0, 0.0, 
 row = 2
 col = 2
 
-obj_points1 = np.zeros((3*3, 3), np.float32)
-obj_points1[:,:2] = np.mgrid[0:6:3j, 0:6:3j].T.reshape(-1,2) # 2*2
+obj_points1 = np.zeros((row*col, 3), np.float32)
+obj_points1[:,:2] = np.mgrid[0:2:2j, 0:2:2j].T.reshape(-1,2) # 2*2
 print(obj_points1)
 
 
-impo = []
-for i in range(col):
-    for j in range(row):
-        tmp = [[0,0,0]]
-        tmp[0][0] = 100 + 40 * j
-        tmp[0][1] = 100 + 40 * i
-        impo.append(tmp[:])
-print(impo)
-print(np.array(impo,dtype=np.float32))
-#img_points = np.array([[[100.0, 100.0]],[[140.0, 100.0]],[[140.0, 100.0]],[[140.0, 140.0]]],dtype = np.float32) #4 * 1 * 2
-img_points = np.array([[[100.0, 100.0]],[[140.0, 100.0]],[[180.0, 100.0]],[[140.0, 100.0]],[[140.0, 140.0]],[[140.0, 180.0]],[[180.0, 100.0]],[[180.0, 140.0]],[[180.0, 180.0]]],dtype = np.float32) #4 * 1 * 2
+img_points = np.array([[[100.0, 100.0]],[[140.0, 100.0]],[[100.0, 140.0]],[[140.0, 140.0]]],dtype = np.float32) #4 * 1 * 2
+#img_points = np.array([[[100.0, 100.0]],[[140.0, 100.0]],[[180.0, 100.0]],[[100.0, 140.0]],[[140.0, 140.0]],[[180.0, 140.0]],[[100.0, 180.0]],[[140.0, 180.0]],[[180.0, 180.0]]],dtype = np.float32) #4 * 1 * 2
 #img_points = np.array(impo) #4 * 1 * 2
 #print(type(img_points),img_points.shape,img_points)
 
@@ -74,4 +65,4 @@ print("projMtx: ",projMtx)
 _3d = np.array([3,3,0,1])
 _2d = np.dot(np.dot(cameraMatrix,projMtx,),_3d)
 _2d = _2d/_2d[2]
-print(_2d)
+print("2d cord",_2d)

@@ -1,7 +1,7 @@
 from util.file import load_dat, save_dat
 from util.calibrator import Corner
 
-_calibrator_path = "./data/param"
+_calibrator_path = "./data/paramleft"
 
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
@@ -118,8 +118,8 @@ def save_camera_matrix(matrix):
     save_cali_dat(_CAMERA_MATRIX, matrix)
 
 
-def load_camera_matrix():
-    matrix = load_cali_dat(_CAMERA_MATRIX)
+def load_camera_matrix(path):
+    matrix = load_cali_dat(path,_CAMERA_MATRIX)
     return matrix
 
 
@@ -127,8 +127,8 @@ def save_camera_matrix_tuned(matrix):
     save_cali_dat(_CAMERA_TUNED_MATRIX, matrix)
 
 
-def load_camera_matrix_tuned():
-    matrix = load_cali_dat(_CAMERA_TUNED_MATRIX)
+def load_camera_matrix_tuned(path):
+    matrix = load_cali_dat(path,_CAMERA_TUNED_MATRIX)
     return matrix
 
 
@@ -136,14 +136,14 @@ def save_camera_distortion(matrix):
     save_cali_dat(_CAMERA_DISTORTION, matrix)
 
 
-def load_camera_distortion():
-    matrix = load_cali_dat(_CAMERA_DISTORTION)
+def load_camera_distortion(path):
+    matrix = load_cali_dat(path,_CAMERA_DISTORTION)
     return matrix
 
 
 # Base function
-def load_cali_dat(key):
-    data = load_dat(_calibrator_path, key)
+def load_cali_dat(path,key):
+    data = load_dat(path, key)
     return data
 
 
