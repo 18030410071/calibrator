@@ -76,24 +76,34 @@ def _calibrate_camera(path,tuned_matrix,distor):
     #print("rtMtx:\n",getProjMtx(np.array(rotation[0]),np.array(translation[0])))
     #rtMtx = getProjMtx(np.array(rotation[0]),np.array(translation[0]))
     rtMtx = getProjMtx(rotation,translation)
-    _3d = np.array([8,0,0,1])
-    _2d = np.dot(np.dot(tuned_matrix,rtMtx,),_3d)
-    _2d = _2d/_2d[2]
-    print("2d-src:",_2d,img_points[0][7])
+
+    mean_err = 0
+    err = 0
+    for i in range(7):
+        for j in range(9):
+            _3d = np.array([j,i,0,1])
+            _2d = np.dot(np.dot(tuned_matrix,rtMtx),_3d)
+            _2d = _2d/_2d[2]
+            err = np.sqrt(np.sum(np.square(img_points[0][i * 9 + j ] - _2d[:2])))
+            mean_err += err
+            print("2d-src:",_2d,img_points[0][i * 9 + j ],err)
+    print("err by own: ",mean_err/63)
+    
+    #compute all all the err by cv
     mean_error = 0
     for i in range(len(obj_points)):
         new_img_points, _ = cv2.projectPoints(obj_points[i], rotation, translation, tuned_matrix, distor)#3D点投影到平面
         error = cv2.norm(img_points[i], new_img_points, cv2.NORM_L2) / len(new_img_points)
         mean_error += error
         print("cv-proj and old:",new_img_points[1],img_points[i][1])
-    print("mean error: ", mean_error / len(obj_points))
+    print("mean error by cv: ", mean_error / len(obj_points))
 
     #return np.array(matrix), np.array(distortion)
     return tuned_matrix,rtMtx
 
-matrixl, rtMtxl = _calibrate_camera("C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\left_S",
+matrixl, rtMtxl = _calibrate_camera("F:\\myrepo\\calibrator\\board\\left_S",
                                     _camera_matrix_left,_camera_distortion_left)
-matrixr, rtMtxr = _calibrate_camera("C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\right_S",
+matrixr, rtMtxr = _calibrate_camera("F:\\myrepo\\calibrator\\board\\right_S",
                                     _camera_matrix_right,_camera_distortion_right)  
 #print("matrix_tuned\n",_camera_tuned_matrix_right)
 #print("matrixr\n",matrixr)
