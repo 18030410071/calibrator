@@ -23,6 +23,21 @@ print(_camera_matrix_left,"\n",_camera_matrix_right)
 
 #
 
+def un_distort_point(point,_camera_matrix, _camera_tuned_matrix, _camera_distortion):
+    """
+    un_distort a specific point
+    :param point: point to distort
+    :return: undistorted point
+    """
+
+    points = np.array([[(point.x, point.y)]], np.float32)
+    temp = cv2.undistortPoints(points, _camera_matrix, _camera_distortion)
+    fx, fy = _camera_tuned_matrix[0][0], _camera_tuned_matrix[1][1]
+    cx, cy = _camera_tuned_matrix[0][2], _camera_tuned_matrix[1][2]
+    x = temp[0][0][0] * fx + cx
+    y = temp[0][0][1] * fy + cy
+    return ge.Point(x, y)
+
 def getProjMtx(rvec,tvec):
     rmtx, _ = cv2.Rodrigues(rvec)
     return np.hstack((rmtx,tvec))
@@ -88,7 +103,7 @@ def _calibrate_camera(path,tuned_matrix,distor):
             mean_err += err
             print("2d-src:",_2d,img_points[0][i * 9 + j ],err)
     print("err by own: ",mean_err/63)
-    
+
     #compute all all the err by cv
     mean_error = 0
     for i in range(len(obj_points)):
@@ -123,8 +138,8 @@ print("_2dl,_2dr",_2dl,"\n", _2dr)
 
 # The cv2 method
 #X = cv2.triangulatePoints( projl, projr, a3xN[:2], b3xN[:2] )  # coor 
-_2dl = np.array([[498.0, 406., 447.],
-                [186.0, 180. ,180.],
+_2dl = np.array([[498.0, 404., 447.],
+                [186.0, 181. ,180.],
                 [1., 1. ,1.]])
 _2dr = np.array([[130.0, 70., 96],
                 [179.0, 168.,170.],
@@ -144,4 +159,6 @@ x2 /= x2[2]
 print('X\n',X)
 print('x1\n',x1)
 print('x2\n',x2)
+
+
 
