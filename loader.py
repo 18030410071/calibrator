@@ -1,7 +1,7 @@
 from util.file import load_dat, save_dat
 from util.calibrator import Corner
 
-_calibrator_path = "./data/paramleft"
+_calibrator_path = "./data/paramright"
 
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480

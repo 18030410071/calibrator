@@ -107,7 +107,7 @@ def _calibrate_camera():
     obj_points = []  # 3d point in real world space
     img_points = []  # 2d points in image plane
 
-    image_list = glob.glob(os.path.join('C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\left', "*.bmp"))
+    image_list = glob.glob(os.path.join('C:\\Users\\chuyangl\\Desktop\\liushuai\\calibrator\\board\\right', "*.bmp"))
     #print(image_list)
     gray = None
     for img_name in image_list:
