@@ -118,6 +118,7 @@ def computeProjectMtx(undistort=False, pointnumber=4):
         if undistort:
             img = undistortImage(img, cameraMatrix1, distCoeffs1)
             img_r = undistortImage(img_r, cameraMatrix2, distCoeffs2)    
+            
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.cvtColor(img_r, cv2.COLOR_BGR2GRAY)
         # Find the chess board corners
@@ -190,6 +191,9 @@ def getImagePoints(undistort = False):
     images = glob.glob('../stereo512/left.bmp')
     images_r = glob.glob('../stereo512/right.bmp')
 
+    #images = glob.glob('left-remap.jpg')
+    #images_r = glob.glob('right-remap.jpg')
+
     images.sort()
     images_r.sort()
 
@@ -203,7 +207,6 @@ def getImagePoints(undistort = False):
             
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.cvtColor(img_r, cv2.COLOR_BGR2GRAY)
-
         # Find the chess board corners
         ret, corners = cv2.findChessboardCorners(gray, (9, 7), None)
         #print('corners',corners)
@@ -272,6 +275,21 @@ if __name__ == '__main__':
     l, r = getImagePoints(undistort=False)
     p3d = getp3d(l, r)
 
+    print(l.shape)
+    points = [[]]
+    for i in range(63):
+        points[0].append((l[0][i],l[1][i]))
+
+    #points = np.array([[(1.,2.), (2., 3.)]])
+    undistort_point = cv2.undistortPoints(np.array(points), cameraMatrix1, distCoeffs1)
+    print(undistort_point.shape)
+    for i in range(63):
+        fx, fy = cameraMatrix1[0][0], cameraMatrix1[1][1]
+        cx, cy = cameraMatrix1[0][2], cameraMatrix1[1][2]
+        x = undistort_point[0][i][0] * fx + cx
+        y = undistort_point[0][i][1] * fy + cy
+        print("undistort point:",(x,y))
+
     print("cheese board corners p3d:\n", p3d)
     print("MSE: ",np.sqrt(np.sum(np.square(p3d - objp)/63, axis = 1)))
     print("MSE2: ",np.sqrt(np.sum(np.square(p3d[-1]-0)/63)))
@@ -285,6 +303,7 @@ if __name__ == '__main__':
     print(p3d)
 
     # RT 矩阵与点数的关系
+    '''
     l, r = getImagePoints(undistort=True)
     pn = [(i+4) for i in range(10)]
     _x, _y, _z= [], [], []
@@ -301,6 +320,7 @@ if __name__ == '__main__':
         _y.append(tmp[1])
         _z.append(tmp[2])
     plot_mse(pn,_x,_y,_z)
+    '''
     
 
     
