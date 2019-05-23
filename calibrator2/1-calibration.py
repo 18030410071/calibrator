@@ -5,8 +5,10 @@ import shelve
 from loader import *
 
 
-
 def calibration():
+    """
+    计算内参矩阵及及畸变系数并持久化
+    """
     # termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 

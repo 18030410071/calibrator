@@ -4,8 +4,8 @@ import numpy as np
 #imgl = cv2.imread('left-remap.jpg')
 #imgr = cv2.imread('right-remap.jpg')
 
-imgl = cv2.imread('../stereo512/left.bmp')
-imgr = cv2.imread('../stereo512/right.bmp')
+imgl = cv2.imread('stereo512/left.bmp')
+imgr = cv2.imread('stereo512/right.bmp')
 
 image = np.hstack((imgl, imgr))
 #image = np.concatenate((gray1, gray2)) #纵向连接=
@@ -25,6 +25,8 @@ imgl = cv2.imread('left-remap.png')
 imgr = cv2.imread('right-remap.png')
 image = np.hstack((imgl, imgr))
 #image = np.concatenate((gray1, gray2)) #纵向连接=
+
+print(image)
 
 for i in range(10):
     ptStart = (0, 48 * i)

@@ -4,17 +4,43 @@ import numpy as np
 import shelve
 from loader import *
 
-mtx = load_camera_matrix()
-mtx_r = load_camera_matrix_r()
-dist = load_camera_distortion()
-dist_r = load_camera_distortion_r()
+cameraMatrix1 = load_camera_matrix()
+cameraMatrix2 = load_camera_matrix_r()
+distCoeffs1 = load_camera_distortion()
+distCoeffs2 = load_camera_distortion_r()
 
+#使用自己定义的坐标系统时 首先初始化以下参数。
+#默认使用棋盘格所在平面为xoy面的笛卡尔直角坐标系统。原点在左上。
+objpoints_selfcoor = None  # 3d point in real world space
+imgpoints_selfcoor = None  # 2d points in image plane.
+imgpoints_r_selfcoor = None
 
 def undistortImage(img,_cam_mtx, _cam_dis):
+    """
+    图像矫正
+    输入: 待矫正图像 内参矩阵 畸变系数
+    输出: 矫正后的图像
+    """
     new_image = cv2.undistort(img, _cam_mtx, _cam_dis)
     return new_image
 
-def calibration(undistort=False):
+def getrtMtx(rvec,tvec):
+    """
+    计算外参矩阵
+    输入: 旋转向量 平移向量
+    输出: 外参矩阵
+    """
+    rmtx, _ = cv2.Rodrigues(rvec)
+    return np.hstack((rmtx,tvec))
+
+def calibration(undistort=False, selfCoor=False):
+    """
+    主要完成以下功能:
+        1. 分别计算单目的投影矩阵并持久化。为计算3d坐标做准备
+        2. 计算双目的投影矩阵及R1 R2 Q 矩阵。为行对准做准备
+    """
+    global imgpoints_r_selfcoor, imgpoints_selfcoor, objpoints_selfcoor
+    global cameraMatrix1, cameraMatrix2, distCoeffs1, distCoeffs2
     # termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -41,8 +67,8 @@ def calibration(undistort=False):
         img_r = cv2.imread(fname_r)
 
         if undistort:
-            img = undistortImage(img, mtx, dist)
-            img_r = undistortImage(img_r, mtx_r, dist_r)    
+            img = undistortImage(img, cameraMatrix1, distCoeffs1)
+            img_r = undistortImage(img_r, cameraMatrix2, distCoeffs2)    
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.cvtColor(img_r, cv2.COLOR_BGR2GRAY)
 
@@ -63,38 +89,41 @@ def calibration(undistort=False):
             imgpoints.append(corners2)
             imgpoints_r.append(corners2_r)
 
-            # Draw and display the corners
-            # cv2.imshow('img', img)
-            # cv2.waitKey(500)
+    # 分别计算投影矩阵并持久化。
+    if not selfCoor:  
+        objpoints_selfcoor = objpoints[0]
+        imgpoints_selfcoor = imgpoints[0]
+        imgpoints_r_selfcoor = imgpoints_r[0]
+    else:
+        if objpoints_selfcoor == None or imgpoints_selfcoor == None or imgpoints_r_selfcoor == None:
+            print("Initial the self-defined coordinate first")
+            return
+    ret, rotation, translation = cv2.solvePnP(objpoints_selfcoor, imgpoints_selfcoor, cameraMatrix1, distCoeffs1)
 
+    ret, rotation_r, translation_r = cv2.solvePnP(objpoints_selfcoor, imgpoints_r_selfcoor, cameraMatrix2, distCoeffs2)
+
+    rt1 = getrtMtx(rotation, translation)
+    rt2 = getrtMtx(rotation_r, translation_r)
+
+    P1_own = np.dot(cameraMatrix1, rt1)
+    P2_own = np.dot(cameraMatrix2, rt2)
+    save_camera_matrix_own_proj(P1_own)
+    save_camera_matrix_own_proj_r(P2_own)
+
+    # 双目计算 R1 R2 P1 P2 Q并持久化。
     retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = \
-    cv2.stereoCalibrate(objpoints, imgpoints, imgpoints_r, mtx,
-                        dist, mtx_r, dist_r, gray.shape[::-1], flags = cv2.CALIB_FIX_INTRINSIC )
-    print("OPENCV R-T\n",R, "\n", T)
-
-    '''matlab
-    R = np.array([[0.898066037373019,	0.0213408993926283,	-0.439342643650985],
-                [-0.0214251464935368,	0.999759088048663,	0.00476749009820505],
-                [0.439338543283939,	0.00513145956036998,	0.898306914427317]])
-
-    T = np.array([-264.886066592313,	-1.77392898927413,	46.7689011903979])
-
-    print("MATLAB R_T",R,"\n",T)
-    matlab'''
-
-    
-    print("mtx\n", mtx)
-    print("mtx_r", mtx_r)
-    R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv2.stereoRectify(
+    cv2.stereoCalibrate(objpoints, imgpoints, imgpoints_r, cameraMatrix1,
+                        distCoeffs1, cameraMatrix2, distCoeffs2, gray.shape[::-1], flags = cv2.CALIB_FIX_INTRINSIC )
+    #print("OPENCV R-T\n",R, "\n", T)
+    R1, R2, P1_stereo, P2_stereo, Q, validPixROI1, validPixROI2 = cv2.stereoRectify(
         cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2,
         gray.shape[::-1], R, T, flags = 0)
-    print("P1,P2\n",P1,"\n", P2)
-    #np.savez("ex_cal.npz", P1=P1, P2=P2, R1=R1, R2=R2, Q=Q)
+    #print("P1,P2\n",P1_stereo,"\n", P2_stereo)
     save_camera_matrix_rot(R1)
     save_camera_matrix_rot_r(R2)
-    save_camera_matrix_proj(P1)
-    save_camera_matrix_proj_r(P2)
+    save_camera_matrix_stereo_proj(P1_stereo)
+    save_camera_matrix_stereo_proj_r(P2_stereo)
     save_camera_matrix_q(Q)
 if __name__ == '__main__':
-    calibration(undistort=True)
+    calibration(undistort=True,selfCoor=False)
     print("External Done!")

@@ -40,8 +40,8 @@ def calibration():
     objpoints_r = []
     imgpoints_r = []
 
-    images = glob.glob('../left512/*.bmp')
-    images_r = glob.glob('../right512/*.bmp')
+    images = glob.glob('left512/*.bmp')
+    images_r = glob.glob('right512/*.bmp')
     #print(images,images_r)
     images.sort()
     images_r.sort()
@@ -109,8 +109,8 @@ def computeProjectMtx(undistort=False, pointnumber=4):
     imgpoints_r = []
 
 
-    images = glob.glob('../stereo512/left.bmp')
-    images_r = glob.glob('../stereo512/right.bmp')
+    images = glob.glob('stereo512/left.bmp')
+    images_r = glob.glob('stereo512/right.bmp')
 
 
     for fname, fname_r in zip(images, images_r):
@@ -190,8 +190,8 @@ def getImagePoints(undistort = False):
     objpoints_r = []
     imgpoints_r = []
 
-    images = glob.glob('../stereo512/left.bmp')
-    images_r = glob.glob('../stereo512/right.bmp')
+    images = glob.glob('stereo512/left.bmp')
+    images_r = glob.glob('stereo512/right.bmp')
 
     #images = glob.glob('left-remap.jpg')
     #images_r = glob.glob('right-remap.jpg')

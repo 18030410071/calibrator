@@ -37,8 +37,11 @@ _CAMERA_TUNED_MATRIX_R = 'camera_tuned_matrix_r'
 _CAMERA_DISTORTION_R = 'camera_distortion_r'
 
 
-_CAMERA_PROJ_MATRIX = 'camera_proj_matrix'
-_CAMERA_PROJ_MATRIX_R = 'camera_proj_matrix_r'
+_CAMERA_PROJ_STEREO_MATRIX = 'camera_proj_stereo_matrix'
+_CAMERA_PROJ_STEREO_MATRIX_R = 'camera_proj_stereo_matrix_r'
+
+_CAMERA_PROJ_OWN_MATRIX = 'camera_proj_own_matrix'
+_CAMERA_PROJ_OWN_MATRIX_R = 'camera_proj_own_matrix_r'
 
 _CAMERA_ROT_MATRIX = 'camera_rot_matrix'
 _CAMERA_ROT_MATRIX_R = 'camera_rot_matrix_r'
@@ -185,19 +188,33 @@ def load_camera_distortion_r():
     matrix = load_cali_dat(_calibrator_path,_CAMERA_DISTORTION_R)
     return matrix
 
-# P1
-def save_camera_matrix_proj(matrix):
-    save_cali_dat(_CAMERA_PROJ_MATRIX, matrix)
-def load_camera_matrix_proj():
-    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_MATRIX)
+# P1_stereo
+def save_camera_matrix_stereo_proj(matrix):
+    save_cali_dat(_CAMERA_PROJ_STEREO_MATRIX, matrix)
+def load_camera_matrix_stereo_proj():
+    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_STEREO_MATRIX)
+    return matrix
+# P2_stereo
+def save_camera_matrix_stereo_proj_r(matrix):
+    save_cali_dat(_CAMERA_PROJ_STEREO_MATRIX_R, matrix)
+def load_camera_matrix_stereo_proj_r():
+    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_STEREO_MATRIX_R)
     return matrix
 
-# P2
-def save_camera_matrix_proj_r(matrix):
-    save_cali_dat(_CAMERA_PROJ_MATRIX_R, matrix)
-def load_camera_matrix_proj_r():
-    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_MATRIX_R)
+# P1_own
+def save_camera_matrix_own_proj(matrix):
+    save_cali_dat(_CAMERA_PROJ_OWN_MATRIX, matrix)
+def load_camera_matrix_own_proj():
+    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_OWN_MATRIX)
     return matrix
+# P2_own
+def save_camera_matrix_own_proj_r(matrix):
+    save_cali_dat(_CAMERA_PROJ_OWN_MATRIX_R, matrix)
+def load_camera_matrix_own_proj_r():
+    matrix = load_cali_dat(_calibrator_path, _CAMERA_PROJ_OWN_MATRIX_R)
+    return matrix
+
+
 # R1
 def save_camera_matrix_rot(matrix):
     save_cali_dat(_CAMERA_ROT_MATRIX, matrix)
